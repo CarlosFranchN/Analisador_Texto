@@ -77,16 +77,16 @@ public class App
     {
 
         // String texto = readFile("test/src/main/java/com/files/carlosText.txt");
-        // String texto = readFile("test\\src\\main\\java\\com\\files\\DonQuixote-388208.txt");
+        String texto = readFile("test\\src\\main\\java\\com\\files\\DonQuixote-388208.txt");
         // String texto = readFile("test\\src\\main\\java\\com\\files\\Dracula-165307.txt");
-        String texto = readFile("test\\src\\main\\java\\com\\files\\MobyDick-217452.txt");
+        // String texto = readFile("test\\src\\main\\java\\com\\files\\MobyDick-217452.txt");
 
         
 
 
 
         try {
-            gerarCsv(texto, "Quijote");
+            gerarCsv("DonQuixote" , texto, "Quijote");
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -117,10 +117,11 @@ public class App
         return  palavras;
     }
 
-    static  int contadorPalavra(String [] texto, String keyword){
+    static  int contadorPalavra(String texto, String keyword){
+        String[] arr = stringToArray(texto);
         int counter = 0;
-        if (texto.length > 0){
-            for (String word : texto) {
+        if (arr.length > 0){
+            for (String word : arr) {
                 if(word.equalsIgnoreCase(keyword)){
                     counter++;
                 }
@@ -208,9 +209,9 @@ public class App
 
 
     static long  gerarTestesSerial(String texto, String keyword){
-        String[] arr = stringToArray(texto);
+        
         long inicio = System.currentTimeMillis();
-        int qtd = contadorPalavra(arr, keyword);
+        int qtd = contadorPalavra(texto, keyword);
         long fim = System.currentTimeMillis();
 
         System.out.println("Serial");
@@ -227,9 +228,11 @@ public class App
         return fim_gpu -inicio_gpu;
     }
 
-    static String gerarCsv(String texto, String keyword) throws IOException {
-            
-        String path = "test/src/main/java/com/csv/file.csv";
+    static String gerarCsv(String titulo, String texto, String keyword) throws IOException {
+                
+        // String  newTitulo = titulo + "_" + "x" + "_" + keyword + "(" + qtd + ")";  
+        String  newTitulo = titulo + "_" + "x" + "_" + keyword;  
+        String path = "test/src/main/java/com/csv/" + newTitulo + ".csv";
         
         
         FileWriter writer = null;
@@ -250,14 +253,16 @@ public class App
     
             writer = new FileWriter(path);  
            
-            writer.append("Amostra,serial,gpu,\n");
+            writer.append("Amostra,palavra-chave,quantidade,serial,gpu,\n");
 
             int num_amostra = 0;
             while (num_amostra < 3) {
-                
+                int numero = contadorPalavra(texto, keyword);
                 long tempoSerial = gerarTestesSerial(texto, keyword);
                 long tempoGpu = gerarTestesGPU(texto, keyword);
                 writer.append(num_amostra + "," );
+                writer.append(keyword + ",");
+                writer.append(numero + ",");
                 writer.append( tempoSerial + ",");
                 writer.append( tempoGpu + ",\n");
                 num_amostra++;
