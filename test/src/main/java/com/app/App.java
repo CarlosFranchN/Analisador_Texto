@@ -253,10 +253,10 @@ public class App
     
             writer = new FileWriter(path);  
            
-            writer.append("Amostra,palavra-chave,quantidade,serial,gpu,\n");
+            writer.append("Amostra,palavra-chave,quantidade,serial,gpu\n");
 
-            int num_amostra = 0;
-            while (num_amostra < 3) {
+            int num_amostra = 1;
+            while (num_amostra < 4) {
                 int numero = contadorPalavra(texto, keyword);
                 long tempoSerial = gerarTestesSerial(texto, keyword);
                 long tempoGpu = gerarTestesGPU(texto, keyword);
@@ -264,7 +264,7 @@ public class App
                 writer.append(keyword + ",");
                 writer.append(numero + ",");
                 writer.append( tempoSerial + ",");
-                writer.append( tempoGpu + ",\n");
+                writer.append( tempoGpu + "\n");
                 num_amostra++;
             }
 
