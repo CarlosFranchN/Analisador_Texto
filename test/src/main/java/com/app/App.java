@@ -2,6 +2,8 @@ package com.app;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
@@ -73,26 +75,22 @@ public class App
     "}";
     public static void main( String[] args )
     {
-        // System.out.println( "Hello World!" );
-        String texto = readFile("test/src/main/java/com/files/carlosText.txt");
-        // for (String word : arr) {
-            //     System.out.println(word);
-            
-            // }
-        String[] arr = stringToArray(texto);
-        long inicio = System.nanoTime();
-        int qtd = contadorPalavra(arr, "carlos");
-        long fim = System.nanoTime();
 
-        System.out.println(qtd);
-        System.out.println((fim-inicio)/1000000  + " Milisegundos");
-        // System.out.println(texto);
-        long inicio_gpu = System.nanoTime();
+        // String texto = readFile("test/src/main/java/com/files/carlosText.txt");
+        // String texto = readFile("test\\src\\main\\java\\com\\files\\DonQuixote-388208.txt");
+        // String texto = readFile("test\\src\\main\\java\\com\\files\\Dracula-165307.txt");
+        String texto = readFile("test\\src\\main\\java\\com\\files\\MobyDick-217452.txt");
 
-        startingOpenCL(texto, "Carlos");
-        long fim_gpu = System.nanoTime();
-        System.out.println(fim_gpu -inicio_gpu/1000000  + " Milisegundos");
         
+
+
+
+        try {
+            gerarCsv(texto, "Quijote");
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     static  String readFile(String arquivo){
@@ -207,6 +205,81 @@ public class App
        System.out.println("A palavra \"" + palavra + "\" aparece " + count[0] + " vezes no texto.");
 
     }
+
+
+    static long  gerarTestesSerial(String texto, String keyword){
+        String[] arr = stringToArray(texto);
+        long inicio = System.currentTimeMillis();
+        int qtd = contadorPalavra(arr, keyword);
+        long fim = System.currentTimeMillis();
+
+        System.out.println("Serial");
+        System.out.println("A palavra \"" + keyword + "\" aparece " + qtd + " vezes no texto.");
+        System.out.println((fim-inicio)  + " Milisegundos");
+        return  fim-inicio;
+    }
+    static long gerarTestesGPU(String texto, String keyword){
+        long inicio_gpu = System.currentTimeMillis();
+        System.out.println("GPU");
+        startingOpenCL(texto, keyword);
+        long fim_gpu = System.currentTimeMillis();
+        System.out.println(fim_gpu -inicio_gpu  + " Milisegundos");
+        return fim_gpu -inicio_gpu;
+    }
+
+    static String gerarCsv(String texto, String keyword) throws IOException {
+            
+        String path = "test/src/main/java/com/csv/file.csv";
+        
+        
+        FileWriter writer = null;
+        
+        try {
+            
+            File file = new File(path);
+            String originalPath = path;
+            int counter = 1;
+    
+            
+            while (file.exists()) {
+                String newPath = originalPath.replace(".csv", "_" + counter + ".csv");
+                file = new File(newPath);
+                path = newPath;  
+                counter++;
+            }
+    
+            writer = new FileWriter(path);  
+           
+            writer.append("Amostra,serial,gpu,\n");
+
+            int num_amostra = 0;
+            while (num_amostra < 3) {
+                
+                long tempoSerial = gerarTestesSerial(texto, keyword);
+                long tempoGpu = gerarTestesGPU(texto, keyword);
+                writer.append(num_amostra + "," );
+                writer.append( tempoSerial + ",");
+                writer.append( tempoGpu + ",\n");
+                num_amostra++;
+            }
+
+
+            System.out.println("Arquivo CSV gerado com sucesso! Caminho: " + path);
+    
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (writer != null) {
+                    writer.flush();
+                    writer.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return path;
+        }
 
 
 }
